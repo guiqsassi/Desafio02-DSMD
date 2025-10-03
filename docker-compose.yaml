@@ -1,0 +1,71 @@
+services:
+  db:
+    image: postgres:latest
+    container_name: db
+    environment:
+      POSTGRES_DB: payments
+      POSTGRES_USER: payments
+      POSTGRES_PASSWORD: 123
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - d2-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U payments -d payments"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:management
+    hostname: my-rabbit
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: 123
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq/mnesia
+      - rabbitmq_log:/var/log/rabbitmq
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+    networks:
+      - d2-network
+
+  payment-service:
+    build:
+      context: ./payment-service
+    container_name: payment-service
+    working_dir: /app
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./payment-service:/app
+      - /app/node_modules
+    environment:
+      DATABASE_URL: postgres://payments:123@db:5432/payments
+      PORT: 8080
+    command: yarn dev
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - d2-network
+
+networks:
+  d2-network:
+    driver: bridge
+
+volumes:
+  db_data:
+  rabbitmq_data:
+  rabbitmq_log:
