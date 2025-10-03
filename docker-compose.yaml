@@ -51,6 +51,7 @@ services:
       - /app/node_modules
     environment:
       DATABASE_URL: postgres://payments:123@db:5432/payments
+      RABBIT_URL: amqp://user:123@rabbitmq:5672
       PORT: 8080
     command: yarn dev
     depends_on:
