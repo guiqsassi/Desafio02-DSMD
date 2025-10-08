@@ -1,1 +1,11 @@
 /node_modules
+
+# Prisma generated client
+/generated
+
+# Environment
+.env
+
+# Local lockfiles
+yarn.lock
+package-lock.json

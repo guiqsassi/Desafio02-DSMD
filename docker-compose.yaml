@@ -51,8 +51,9 @@ services:
       - /app/node_modules
     environment:
       DATABASE_URL: postgres://payments:123@db:5432/payments
+      RABBIT_URL: amqp://user:123@rabbitmq:5672
       PORT: 8080
-    command: yarn dev
+    command: yarn run dev
     depends_on:
       db:
         condition: service_healthy
@@ -60,6 +61,25 @@ services:
         condition: service_healthy
     networks:
       - d2-network
+  notification-service:
+    build:
+      context: ./notification-service
+    container_name: notification-service
+    working_dir: /app
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./notification-service:/app
+      - /app/node_modules
+    environment:
+      RABBIT_URL: amqp://user:123@rabbitmq:5672
+    command: yarn run dev
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - d2-network
+
 
 networks:
   d2-network:

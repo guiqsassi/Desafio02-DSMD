@@ -1,4 +1,23 @@
 /db_data
 /rabbitmq_data
 /rabbitmq_log
+/node_modules
+
+/node_modules
+**/node_modules
+
+# Build / generated artifacts
+/generated
+**/generated
+
+# Environment files
+*.env
+/.env
+**/.env
+
+# macOS
+.DS_Store
+
+# Prisma generated client (if exists)
+/payment-service/generated
 

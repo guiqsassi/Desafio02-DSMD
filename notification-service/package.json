@@ -1,0 +1,16 @@
+{
+  "type": "module",
+  "name": "notification-service",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "amqplib": "^0.10.9",
+    "dotenv": "^17.2.3",
+    "nodemon": "^3.1.10"
+  }
+}

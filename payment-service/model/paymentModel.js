@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-
+import RabbitMqService from "../services/RabbitMqService.js";
 
 
 class PaymentModel {
@@ -9,10 +9,47 @@ class PaymentModel {
 
 
     create= async (payment) => {
-        return await this.prismaClient.payment.create({
-            data: payment
-        })
+        let result = await this.prismaClient.payment.create({
+            data: {
+                username: payment.username,
+                status: "Pending",
+                amount: BigInt(payment.amount)
+            }
+        });
+        result =  {
+            ...result,
+            amount: result.amount.toString()
+        }
+        const isMessageSent = await RabbitMqService.sendMessage("notification", result)
+        if(!isMessageSent){
+            return {e: "Mensagem não enviada"}
+        }
+        return result;
+
     }
+    approvePayment = async(payment)=>{
+        let result = await this.prismaClient.payment.update({
+            where: {
+                id: payment.id
+            },
+            data: {
+                status: "Completed",
+            }
+        });
+        result =  {
+            ...result,
+            amount: result.amount.toString()
+        }
+        const isMessageSent = await RabbitMqService.sendMessage("notification", result)
+        if(!isMessageSent){
+            return {e: "Mensagem não enviada"}
+        }
+
+        return result;
+        
+    }
+
+
 }
 
 export default new PaymentModel()
