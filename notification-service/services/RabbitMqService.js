@@ -44,13 +44,22 @@ class RabbitMQService {
         
 
         const content = JSON.parse(message.content);
-        content.status = "Completed";
-        this.sendMessage("approve-payment", content).then(r=>{
-          this.channel.ack(message);
-          console.log("mensagem de approve-payment enviada")
-        }).catch(e=>{
-          console.log("erro ao enviar mensagem de approve-payment: "+ e.message)
-        });
+
+        if(content.status == "Pending"){
+          console.log("Solicitação de Trasanção de: " + content.username + " recebido com sucesso")
+          content.status = "Completed";
+          this.sendMessage("approve-payment", content).then(r=>{
+            this.channel.ack(message);
+            console.log("mensagem de approve-payment enviada")
+          }).catch(e=>{
+            console.log("erro ao enviar mensagem de approve-payment: "+ e.message)
+          });
+        }
+        else if(content.status == "Completed"){
+          console.log("Transação concluida com sucesso!")
+
+        }
+
 
       });
     } catch (error) {

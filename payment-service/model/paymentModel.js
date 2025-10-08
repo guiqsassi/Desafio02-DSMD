@@ -36,10 +36,16 @@ class PaymentModel {
                 status: "Completed",
             }
         });
-        return {
+        result =  {
             ...result,
             amount: result.amount.toString()
         }
+        const isMessageSent = await RabbitMqService.sendMessage("notification", result)
+        if(!isMessageSent){
+            return {e: "Mensagem não enviada"}
+        }
+
+        return result;
         
     }
 
